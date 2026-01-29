@@ -64,12 +64,12 @@ export default function StrokesPage() {
         highlightOnComplete: true,
         highlightColor: '#22c55e',
         leniency: 1.5,
-        charDataLoader: (c: string, onComplete: (data: object) => void) => {
-          fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${c}.json`)
+        charDataLoader: (char, onLoad) => {
+          fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${char}.json`)
             .then(res => res.json())
-            .then(onComplete)
+            .then(onLoad)
             .catch(() => {
-              console.log('Character not found:', c);
+              console.log('Character not found:', char);
             });
         },
       });
