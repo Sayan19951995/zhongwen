@@ -11,18 +11,20 @@ type Mode = 'animate' | 'quiz';
 
 export default function StrokesPage() {
   const router = useRouter();
-  const writerRef = useRef<HanziWriter | null>(null);
+  const writersRef = useRef<HanziWriter[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [words, setWords] = useState<Word[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mode, setMode] = useState<Mode>('animate');
   const [isAnimating, setIsAnimating] = useState(false);
+  const [currentCharIndex, setCurrentCharIndex] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
   const [mistakes, setMistakes] = useState(0);
-  const [showHint, setShowHint] = useState(false);
+  const [showOutline, setShowOutline] = useState(true);
 
   const currentWord = words[currentIndex];
+  const characters = currentWord?.character.split('') || [];
 
   // Initialize words
   useEffect(() => {
@@ -31,102 +33,159 @@ export default function StrokesPage() {
     setWords(shuffleArray(allWords));
   }, []);
 
-  // Initialize HanziWriter
-  const initWriter = useCallback(() => {
+  // Initialize HanziWriters for all characters
+  const initWriters = useCallback(() => {
     if (!containerRef.current || !currentWord) return;
 
     // Clear previous
     containerRef.current.innerHTML = '';
-    writerRef.current = null;
+    writersRef.current = [];
+    setCurrentCharIndex(0);
+    setQuizComplete(false);
+    setMistakes(0);
 
-    const character = currentWord.character[0]; // Take first character if compound
+    const chars = currentWord.character.split('');
+    const charSize = chars.length === 1 ? 200 : chars.length === 2 ? 140 : 100;
 
-    try {
-      writerRef.current = HanziWriter.create(containerRef.current, character, {
-        width: 280,
-        height: 280,
-        padding: 10,
-        strokeColor: '#1f2937',
-        radicalColor: '#ef4444',
-        outlineColor: '#e5e7eb',
-        drawingColor: '#ef4444',
-        showOutline: true,
-        showCharacter: mode === 'animate',
-        delayBetweenStrokes: 300,
-        strokeAnimationSpeed: 1,
-        delayBetweenLoops: 2000,
-        drawingWidth: 20,
-        showHintAfterMisses: 3,
-        highlightOnComplete: true,
-        charDataLoader: (char: string, onComplete: (data: object) => void) => {
-          fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${char}.json`)
-            .then(res => res.json())
-            .then(onComplete)
-            .catch(() => {
-              console.log('Character not found:', char);
-            });
-        },
-      });
+    chars.forEach((char, index) => {
+      const charContainer = document.createElement('div');
+      charContainer.className = 'inline-block bg-gray-50 rounded-xl border border-gray-200';
+      charContainer.style.width = `${charSize}px`;
+      charContainer.style.height = `${charSize}px`;
+      containerRef.current?.appendChild(charContainer);
 
-      if (mode === 'quiz') {
-        setQuizComplete(false);
-        setMistakes(0);
-        writerRef.current.quiz({
-          onMistake: () => {
-            setMistakes(prev => prev + 1);
-          },
-          onComplete: () => {
-            setQuizComplete(true);
+      try {
+        const writer = HanziWriter.create(charContainer, char, {
+          width: charSize,
+          height: charSize,
+          padding: 8,
+          strokeColor: '#1f2937',
+          radicalColor: '#1f2937',
+          outlineColor: '#d1d5db',
+          drawingColor: '#1f2937',
+          showOutline: showOutline,
+          showCharacter: mode === 'animate',
+          delayBetweenStrokes: 300,
+          strokeAnimationSpeed: 1.2,
+          delayBetweenLoops: 2000,
+          drawingWidth: 18,
+          showHintAfterMisses: 2,
+          highlightOnComplete: true,
+          highlightColor: '#22c55e',
+          leniency: 1.5, // More forgiving stroke matching
+          charDataLoader: (c: string, onComplete: (data: object) => void) => {
+            fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${c}.json`)
+              .then(res => res.json())
+              .then(onComplete)
+              .catch(() => {
+                console.log('Character not found:', c);
+              });
           },
         });
+
+        writersRef.current.push(writer);
+
+        // Start quiz for first character
+        if (mode === 'quiz' && index === 0) {
+          writer.quiz({
+            onMistake: () => {
+              setMistakes(prev => prev + 1);
+            },
+            onComplete: () => {
+              // Move to next character or complete
+              if (index < chars.length - 1) {
+                setCurrentCharIndex(prev => {
+                  const next = prev + 1;
+                  // Start quiz for next character
+                  setTimeout(() => {
+                    writersRef.current[next]?.quiz({
+                      onMistake: () => setMistakes(prev => prev + 1),
+                      onComplete: () => {
+                        if (next === chars.length - 1) {
+                          setQuizComplete(true);
+                        }
+                      },
+                    });
+                  }, 300);
+                  return next;
+                });
+              } else {
+                setQuizComplete(true);
+              }
+            },
+          });
+        }
+      } catch (e) {
+        console.error('Failed to create HanziWriter:', e);
       }
-    } catch (e) {
-      console.error('Failed to create HanziWriter:', e);
-    }
-  }, [currentWord, mode]);
+    });
+  }, [currentWord, mode, showOutline]);
+
+  // Start quiz for subsequent characters
+  const startNextCharQuiz = useCallback((charIndex: number) => {
+    const writer = writersRef.current[charIndex];
+    if (!writer || mode !== 'quiz') return;
+
+    writer.quiz({
+      onMistake: () => setMistakes(prev => prev + 1),
+      onComplete: () => {
+        if (charIndex < characters.length - 1) {
+          setCurrentCharIndex(charIndex + 1);
+          startNextCharQuiz(charIndex + 1);
+        } else {
+          setQuizComplete(true);
+        }
+      },
+    });
+  }, [mode, characters.length]);
 
   useEffect(() => {
     if (currentWord) {
-      initWriter();
+      initWriters();
     }
-  }, [currentWord, mode, initWriter]);
+  }, [currentWord, mode, initWriters]);
 
-  const handleAnimate = () => {
-    if (!writerRef.current || isAnimating) return;
-    setIsAnimating(true);
-    writerRef.current.animateCharacter({
-      onComplete: () => setIsAnimating(false),
+  // Update outline visibility
+  useEffect(() => {
+    writersRef.current.forEach(writer => {
+      if (showOutline) {
+        writer.showOutline();
+      } else {
+        writer.hideOutline();
+      }
     });
-  };
+  }, [showOutline]);
 
-  const handleShowHint = () => {
-    if (!writerRef.current) return;
-    setShowHint(true);
-    writerRef.current.showOutline();
-    setTimeout(() => {
-      writerRef.current?.hideOutline();
-      setShowHint(false);
-    }, 1500);
+  const handleAnimate = async () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+
+    // Animate characters one by one
+    for (let i = 0; i < writersRef.current.length; i++) {
+      await new Promise<void>(resolve => {
+        writersRef.current[i].animateCharacter({
+          onComplete: resolve,
+        });
+      });
+    }
+
+    setIsAnimating(false);
   };
 
   const handleNext = () => {
     if (currentIndex < words.length - 1) {
       setCurrentIndex(prev => prev + 1);
-      setQuizComplete(false);
-      setMistakes(0);
     }
   };
 
   const handlePrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
-      setQuizComplete(false);
-      setMistakes(0);
     }
   };
 
   const handleReset = () => {
-    initWriter();
+    initWriters();
   };
 
   if (words.length === 0) {
@@ -182,12 +241,11 @@ export default function StrokesPage() {
         </button>
       </div>
 
-      {/* Character canvas */}
+      {/* Character canvases */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <div
           ref={containerRef}
-          className="bg-white rounded-2xl border-2 border-gray-200 shadow-sm"
-          style={{ width: 280, height: 280 }}
+          className="flex gap-2 justify-center items-center"
         />
 
         {/* Quiz feedback */}
@@ -199,7 +257,8 @@ export default function StrokesPage() {
               </p>
             ) : (
               <p className="text-gray-500 text-sm">
-                Нарисуйте иероглиф {mistakes > 0 && `(ошибок: ${mistakes})`}
+                {characters.length > 1 && `Иероглиф ${currentCharIndex + 1} из ${characters.length}. `}
+                Нарисуйте {mistakes > 0 && `(ошибок: ${mistakes})`}
               </p>
             )}
           </div>
@@ -218,12 +277,12 @@ export default function StrokesPage() {
           </button>
         ) : (
           <div className="flex gap-2">
+            {/* Outline toggle */}
             <button
-              onClick={handleShowHint}
-              disabled={showHint}
-              className="btn btn-secondary flex-1"
+              onClick={() => setShowOutline(!showOutline)}
+              className={`btn flex-1 ${showOutline ? 'btn-primary' : 'btn-secondary'}`}
             >
-              Подсказка
+              Контур {showOutline ? 'вкл' : 'выкл'}
             </button>
             <button
               onClick={handleReset}
