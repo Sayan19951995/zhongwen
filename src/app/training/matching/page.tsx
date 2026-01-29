@@ -87,7 +87,7 @@ export default function MatchingPage() {
     return () => clearInterval(timer);
   }, [isComplete, timeLeft]);
 
-  // Add new word when matched
+  // Add new word when matched - insert at random positions
   const addNewWord = useCallback(() => {
     const availableWords = allWords.filter(w => !usedWordIds.has(w.id));
     if (availableWords.length === 0) return null;
@@ -95,23 +95,36 @@ export default function MatchingPage() {
     const newWord = availableWords[0];
     setUsedWordIds(prev => new Set([...prev, newWord.id]));
 
-    const newCards: CardItem[] = [
-      {
-        id: `t-${newWord.id}-${Date.now()}`,
-        wordId: newWord.id,
-        type: 'translation',
-        content: newWord.translation,
-      },
-      {
-        id: `c-${newWord.id}-${Date.now()}`,
-        wordId: newWord.id,
-        type: 'character',
-        content: newWord.character,
-        pinyin: newWord.pinyin,
-      },
-    ];
+    const translationCard: CardItem = {
+      id: `t-${newWord.id}-${Date.now()}`,
+      wordId: newWord.id,
+      type: 'translation',
+      content: newWord.translation,
+    };
 
-    setCards(prev => [...prev, ...newCards]);
+    const characterCard: CardItem = {
+      id: `c-${newWord.id}-${Date.now()}`,
+      wordId: newWord.id,
+      type: 'character',
+      content: newWord.character,
+      pinyin: newWord.pinyin,
+    };
+
+    setCards(prev => {
+      // Separate existing cards by type
+      const translations = prev.filter(c => c.type === 'translation');
+      const characters = prev.filter(c => c.type === 'character');
+
+      // Insert new cards at random positions
+      const tPos = Math.floor(Math.random() * (translations.length + 1));
+      const cPos = Math.floor(Math.random() * (characters.length + 1));
+
+      translations.splice(tPos, 0, translationCard);
+      characters.splice(cPos, 0, characterCard);
+
+      return [...translations, ...characters];
+    });
+
     return newWord;
   }, [allWords, usedWordIds]);
 
