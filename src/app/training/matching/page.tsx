@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { getWordsByBlocks, shuffleArray, formatTime } from '@/lib/utils';
 import { getSelectedBlocks, updateStats, completeSession } from '@/lib/storage';
@@ -206,30 +205,16 @@ export default function MatchingPage() {
     const allWordsFinished = matchedIds.size === allWords.length;
     const success = totalMatched >= 10 || allWordsFinished;
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="mb-8"
-        >
+      <div className="flex-1 flex flex-col items-center justify-center text-center animate-fade-in">
+        <div className="mb-8">
           <span className="text-8xl">{success ? '🎉' : '⏰'}</span>
-        </motion.div>
+        </div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-3xl font-bold text-gray-800 mb-4"
-        >
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">
           {allWordsFinished ? 'Все слова пройдены!' : success ? 'Отлично!' : 'Время вышло!'}
-        </motion.h1>
+        </h1>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="space-y-2 mb-8"
-        >
+        <div className="space-y-2 mb-8">
           <p className="text-xl">
             Угадано пар:{' '}
             <span className="font-bold text-green-500">
@@ -239,14 +224,9 @@ export default function MatchingPage() {
           <p className="text-xl">
             Счёт: <span className="font-bold text-red-500">{score}</span>
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="space-y-3 w-full"
-        >
+        <div className="space-y-3 w-full">
           <button
             onClick={() => window.location.reload()}
             className="btn btn-primary w-full"
@@ -259,7 +239,7 @@ export default function MatchingPage() {
           >
             Выбрать режим
           </button>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -279,37 +259,28 @@ export default function MatchingPage() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-400">COMBO</span>
-            <motion.span
-              key={combo}
-              initial={{ scale: 1.5 }}
-              animate={{ scale: 1 }}
-              className={`font-bold ${combo > 0 ? 'text-red-500' : 'text-gray-400'}`}
-            >
+            <span className={`font-bold ${combo > 0 ? 'text-red-500' : 'text-gray-400'}`}>
               x{combo}
-            </motion.span>
+            </span>
             {combo >= 5 && <span>🔥</span>}
           </div>
         </div>
 
         {/* Timer */}
-        <motion.div
-          animate={timeLeft <= 10 ? { scale: [1, 1.1, 1] } : {}}
-          transition={{ repeat: timeLeft <= 10 ? Infinity : 0, duration: 0.5 }}
+        <div
           className={`font-mono font-bold ${
             timeLeft <= 10 ? 'text-red-500' : 'text-gray-600'
           }`}
         >
           {formatTime(timeLeft)}
-        </motion.div>
+        </div>
       </div>
 
       {/* Progress bar */}
       <div className="h-2 bg-gray-200 rounded-full mb-4 overflow-hidden">
-        <motion.div
-          className="h-full bg-red-500"
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min((totalMatched / 15) * 100, 100)}%` }}
-          transition={{ duration: 0.3 }}
+        <div
+          className="h-full bg-red-500 transition-all duration-300"
+          style={{ width: `${Math.min((totalMatched / 15) * 100, 100)}%` }}
         />
       </div>
 
@@ -339,71 +310,57 @@ export default function MatchingPage() {
       <div className="flex-1 flex gap-3">
         {/* Left column - translations */}
         <div className="flex-1 flex flex-col gap-3">
-          <AnimatePresence>
-            {leftCards.map((card) => {
-              const isMatched = matchedIds.has(card.wordId);
-              const isSelected = selectedCard?.id === card.id;
-              const isWrong = wrongPair.includes(card.id);
+          {leftCards.map((card) => {
+            const isMatched = matchedIds.has(card.wordId);
+            const isSelected = selectedCard?.id === card.id;
+            const isWrong = wrongPair.includes(card.id);
 
-              if (isMatched) return null;
+            if (isMatched) return null;
 
-              return (
-                <motion.button
-                  key={card.id}
-                  layout
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleCardClick(card)}
-                  className={`card p-4 text-center no-select transition-all min-h-[88px] flex items-center justify-center ${
-                    isWrong
-                      ? 'border-red-500 bg-red-50 animate-shake'
-                      : isSelected
-                      ? 'border-red-500 bg-red-50 ring-2 ring-red-200'
-                      : 'border-gray-200'
-                  }`}
-                >
-                  <span className="text-lg">{card.content}</span>
-                </motion.button>
-              );
-            })}
-          </AnimatePresence>
+            return (
+              <button
+                key={card.id}
+                onClick={() => handleCardClick(card)}
+                className={`card p-4 text-center no-select min-h-[88px] flex items-center justify-center transition-colors ${
+                  isWrong
+                    ? 'border-red-500 bg-red-50 animate-shake'
+                    : isSelected
+                    ? 'border-red-500 bg-red-50 ring-2 ring-red-200'
+                    : 'border-gray-200'
+                }`}
+              >
+                <span className="text-lg">{card.content}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Right column - characters */}
         <div className="flex-1 flex flex-col gap-3">
-          <AnimatePresence>
-            {rightCards.map((card) => {
-              const isMatched = matchedIds.has(card.wordId);
-              const isSelected = selectedCard?.id === card.id;
-              const isWrong = wrongPair.includes(card.id);
+          {rightCards.map((card) => {
+            const isMatched = matchedIds.has(card.wordId);
+            const isSelected = selectedCard?.id === card.id;
+            const isWrong = wrongPair.includes(card.id);
 
-              if (isMatched) return null;
+            if (isMatched) return null;
 
-              return (
-                <motion.button
-                  key={card.id}
-                  layout
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleCardClick(card)}
-                  className={`card p-4 text-center no-select transition-all min-h-[88px] flex flex-col items-center justify-center ${
-                    isWrong
-                      ? 'border-red-500 bg-red-50 animate-shake'
-                      : isSelected
-                      ? 'border-red-500 bg-red-50 ring-2 ring-red-200'
-                      : 'border-gray-200'
-                  }`}
-                >
-                  {showPinyin && <span className="text-sm pinyin">{card.pinyin}</span>}
-                  <span className="text-2xl chinese">{card.content}</span>
-                </motion.button>
-              );
-            })}
-          </AnimatePresence>
+            return (
+              <button
+                key={card.id}
+                onClick={() => handleCardClick(card)}
+                className={`card p-4 text-center no-select min-h-[88px] flex flex-col items-center justify-center transition-colors ${
+                  isWrong
+                    ? 'border-red-500 bg-red-50 animate-shake'
+                    : isSelected
+                    ? 'border-red-500 bg-red-50 ring-2 ring-red-200'
+                    : 'border-gray-200'
+                }`}
+              >
+                {showPinyin && <span className="text-sm pinyin">{card.pinyin}</span>}
+                <span className="text-2xl chinese">{card.content}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
