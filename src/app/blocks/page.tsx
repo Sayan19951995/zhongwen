@@ -55,7 +55,7 @@ function BlocksContent() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="mb-4"
       >
         <button
           onClick={() => router.back()}
@@ -69,6 +69,27 @@ function BlocksContent() {
         <p className="text-gray-500 text-sm mt-1">
           {selectedIds.length} из {blocks.length} блоков выбрано
         </p>
+      </motion.div>
+
+      {/* Start button - top */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mb-4"
+      >
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={handleStart}
+          disabled={selectedIds.length === 0}
+          className={`btn w-full text-lg ${
+            selectedIds.length > 0
+              ? 'btn-primary'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          {mode === 'test' ? 'Начать тест' : 'Начать тренировку'}
+        </motion.button>
       </motion.div>
 
       {/* Select All */}
@@ -153,26 +174,6 @@ function BlocksContent() {
         })}
       </div>
 
-      {/* Start button */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="pt-4 mt-4 border-t border-gray-200"
-      >
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={handleStart}
-          disabled={selectedIds.length === 0}
-          className={`btn w-full text-lg ${
-            selectedIds.length > 0
-              ? 'btn-primary'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          {mode === 'test' ? 'Начать тест' : 'Начать тренировку'}
-        </motion.button>
-      </motion.div>
     </div>
   );
 }
