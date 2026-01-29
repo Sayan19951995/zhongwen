@@ -1,0 +1,16 @@
+{
+  "name": "Китайский язык | 中文",
+  "short_name": "中文",
+  "description": "Приложение для изучения китайского языка",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#EF4444",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
