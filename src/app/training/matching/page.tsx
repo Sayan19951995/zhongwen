@@ -115,12 +115,19 @@ export default function MatchingPage() {
     return newWord;
   }, [allWords, usedWordIds]);
 
-  // Check completion (only when time runs out or all words used)
+  // Check completion (when time runs out OR all words matched)
   useEffect(() => {
-    if (timeLeft <= 0 && !isComplete) {
+    if (isComplete) return;
+
+    // Check if all words have been used and matched
+    const allWordsMatched = allWords.length > 0 &&
+      usedWordIds.size === allWords.length &&
+      matchedIds.size === allWords.length;
+
+    if (timeLeft <= 0 || allWordsMatched) {
       setIsComplete(true);
       completeSession();
-      if (totalMatched >= 10) {
+      if (totalMatched >= 10 || allWordsMatched) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -128,7 +135,7 @@ export default function MatchingPage() {
         });
       }
     }
-  }, [timeLeft, isComplete, totalMatched]);
+  }, [timeLeft, isComplete, totalMatched, allWords.length, usedWordIds.size, matchedIds.size]);
 
   const handleCardClick = useCallback(
     (card: CardItem) => {
@@ -183,7 +190,8 @@ export default function MatchingPage() {
   const rightCards = cards.filter((c) => c.type === 'character');
 
   if (isComplete) {
-    const success = totalMatched >= 10;
+    const allWordsFinished = matchedIds.size === allWords.length;
+    const success = totalMatched >= 10 || allWordsFinished;
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <motion.div
@@ -200,7 +208,7 @@ export default function MatchingPage() {
           transition={{ delay: 0.2 }}
           className="text-3xl font-bold text-gray-800 mb-4"
         >
-          {success ? 'Отлично!' : 'Время вышло!'}
+          {allWordsFinished ? 'Все слова пройдены!' : success ? 'Отлично!' : 'Время вышло!'}
         </motion.h1>
 
         <motion.div
