@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { MatchingIcon, CardsIcon, QuizIcon, KeyboardIcon } from '@/components/icons';
+import { MatchingIcon, CardsIcon, QuizIcon, KeyboardIcon, PenIcon } from '@/components/icons';
 
 const trainingModes: {
   id: string;
@@ -38,6 +38,13 @@ const trainingModes: {
     icon: <KeyboardIcon className="text-orange-500" size={36} />,
     description: 'Напиши перевод',
     color: 'bg-orange-50 border-orange-200',
+  },
+  {
+    id: 'strokes',
+    title: 'Strokes',
+    icon: <PenIcon className="text-red-500" size={36} />,
+    description: 'Учи порядок черт',
+    color: 'bg-red-50 border-red-200',
   },
 ];
 

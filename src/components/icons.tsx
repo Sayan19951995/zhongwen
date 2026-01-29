@@ -160,3 +160,15 @@ export function WaveIcon({ className = '', size = 32 }: IconProps) {
     </svg>
   );
 }
+
+// Кисточка/ручка - для режима написания
+export function PenIcon({ className = '', size = 32 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M12 19l7-7 3 3-7 7-3-3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2 2l7.586 7.586" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="11" cy="11" r="2" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
