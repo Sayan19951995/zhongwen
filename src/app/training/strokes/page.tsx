@@ -22,6 +22,7 @@ export default function StrokesPage() {
   const [quizComplete, setQuizComplete] = useState(false);
   const [mistakes, setMistakes] = useState(0);
   const [showOutline, setShowOutline] = useState(true);
+  const [showCharPreview, setShowCharPreview] = useState(true);
 
   const currentWord = words[currentIndex];
   const characters = currentWord?.character.split('') || [];
@@ -183,10 +184,17 @@ export default function StrokesPage() {
                   : 'text-gray-300'
               }`}
             >
-              {char}
+              {showCharPreview ? char : '?'}
             </span>
           ))}
         </div>
+        {/* Toggle to hide characters */}
+        <button
+          onClick={() => setShowCharPreview(!showCharPreview)}
+          className="mt-2 text-xs text-gray-400 hover:text-gray-600"
+        >
+          {showCharPreview ? '🙈 Скрыть' : '👁 Показать'}
+        </button>
       </div>
 
       {/* Mode toggle */}
