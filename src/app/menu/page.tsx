@@ -2,7 +2,6 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { getName, saveName } from '@/lib/storage';
 import { TargetIcon, TestIcon, SearchIcon, ChartIcon, UserIcon, WaveIcon } from '@/components/icons';
 
@@ -54,28 +53,20 @@ export default function MenuPage() {
   }, [router]);
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col animate-fade-in">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
-      >
+      <div className="text-center mb-8">
         <p className="text-gray-500 text-sm mb-1">Добро пожаловать</p>
         <h1 className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
           Привет, {name}! <WaveIcon className="text-amber-500" size={28} />
         </h1>
-      </motion.div>
+      </div>
 
       {/* Menu items */}
       <div className="flex-1 flex flex-col gap-4">
-        {menuItems.map((item, index) => (
-          <motion.button
+        {menuItems.map((item) => (
+          <button
             key={item.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileTap={{ scale: 0.98 }}
             onClick={() => router.push(item.href)}
             className={`card p-5 text-left ${item.color} border-2 no-select`}
           >
@@ -88,32 +79,22 @@ export default function MenuPage() {
                 <p className="text-gray-500 text-sm">{item.description}</p>
               </div>
             </div>
-          </motion.button>
+          </button>
         ))}
       </div>
 
       {/* Stats preview */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="mt-8 text-center"
-      >
+      <div className="mt-8 text-center">
         <button
           onClick={() => router.push('/stats')}
           className="text-gray-400 text-sm hover:text-gray-600 transition-colors flex items-center gap-2 justify-center"
         >
           <ChartIcon className="text-gray-400" size={18} /> Статистика
         </button>
-      </motion.div>
+      </div>
 
       {/* Change name option */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6"
-      >
+      <div className="mt-6">
         <button
           onClick={() => {
             saveName('');
@@ -124,7 +105,7 @@ export default function MenuPage() {
           <UserIcon className="text-gray-400" size={18} />
           <span>Сменить имя</span>
         </button>
-      </motion.div>
+      </div>
     </div>
   );
 }

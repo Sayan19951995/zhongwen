@@ -2,7 +2,6 @@
 
 import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { MatchingIcon, CardsIcon, QuizIcon, KeyboardIcon } from '@/components/icons';
 
 const trainingModes: {
@@ -46,13 +45,9 @@ export default function TrainingPage() {
   const router = useRouter();
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col animate-fade-in">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
+      <div className="mb-6">
         <button
           onClick={() => router.push('/menu')}
           className="text-gray-400 text-sm mb-2 flex items-center gap-1"
@@ -62,17 +57,13 @@ export default function TrainingPage() {
         <h1 className="text-2xl font-bold text-gray-800">
           Выберите режим тренировки
         </h1>
-      </motion.div>
+      </div>
 
       {/* Training modes */}
       <div className="flex-1 flex flex-col gap-4">
-        {trainingModes.map((mode, index) => (
-          <motion.button
+        {trainingModes.map((mode) => (
+          <button
             key={mode.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileTap={{ scale: 0.98 }}
             onClick={() => router.push(`/training/${mode.id}`)}
             className={`card p-5 text-left ${mode.color} border-2 no-select`}
           >
@@ -85,7 +76,7 @@ export default function TrainingPage() {
                 <p className="text-gray-500 text-sm">{mode.description}</p>
               </div>
             </div>
-          </motion.button>
+          </button>
         ))}
       </div>
     </div>

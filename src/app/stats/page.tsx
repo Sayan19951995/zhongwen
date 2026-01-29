@@ -2,7 +2,6 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { getUserProgress, getName } from '@/lib/storage';
 import { UserProgress } from '@/types';
 import { BookIcon, CheckIcon, CrossIcon, BoltIcon, FlagIcon } from '@/components/icons';
@@ -68,13 +67,9 @@ export default function StatsPage() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col animate-fade-in">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
+      <div className="mb-6">
         <button
           onClick={() => router.push('/menu')}
           className="text-gray-400 text-sm mb-2"
@@ -83,15 +78,10 @@ export default function StatsPage() {
         </button>
         <h1 className="text-2xl font-bold text-gray-800">Статистика</h1>
         <p className="text-gray-500 text-sm">{getName()}</p>
-      </motion.div>
+      </div>
 
       {/* Accuracy circle */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: 'spring' }}
-        className="flex justify-center mb-8"
-      >
+      <div className="flex justify-center mb-8">
         <div className="relative w-40 h-40">
           <svg className="w-full h-full -rotate-90">
             <circle
@@ -102,7 +92,7 @@ export default function StatsPage() {
               strokeWidth="12"
               fill="none"
             />
-            <motion.circle
+            <circle
               cx="80"
               cy="80"
               r="70"
@@ -110,33 +100,24 @@ export default function StatsPage() {
               strokeWidth="12"
               fill="none"
               strokeLinecap="round"
-              initial={{ strokeDasharray: '0 440' }}
-              animate={{ strokeDasharray: `${(accuracy / 100) * 440} 440` }}
-              transition={{ duration: 1, delay: 0.3 }}
+              strokeDasharray={`${(accuracy / 100) * 440} 440`}
+              className="transition-all duration-500"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-4xl font-bold text-gray-800"
-            >
+            <span className="text-4xl font-bold text-gray-800">
               {accuracy}%
-            </motion.span>
+            </span>
             <span className="text-sm text-gray-500">точность</span>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Stats grid */}
       <div className="space-y-3">
-        {statItems.map((item, index) => (
-          <motion.div
+        {statItems.map((item) => (
+          <div
             key={item.label}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 + index * 0.1 }}
             className={`card p-4 ${item.color}`}
           >
             <div className="flex items-center justify-between">
@@ -148,17 +129,12 @@ export default function StatsPage() {
                 {item.value}
               </span>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Reset button */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="mt-8"
-      >
+      <div className="mt-8">
         <button
           onClick={() => {
             if (confirm('Вы уверены, что хотите сбросить статистику?')) {
@@ -183,7 +159,7 @@ export default function StatsPage() {
         >
           Сбросить статистику
         </button>
-      </motion.div>
+      </div>
     </div>
   );
 }
